@@ -55,7 +55,6 @@ namespace Trust.Extensions
             if (curDistance < followDistance)
             {
                 //await StopMoving();
-                Navigator.PlayerMover.MoveStop();
                 Navigator.Stop();
                 return true;
             }
@@ -67,7 +66,6 @@ namespace Trust.Extensions
                 if (curDistance < followDistance)
                 {
                     //await StopMoving();
-                    Navigator.PlayerMover.MoveStop();
                     Navigator.Stop();
                     return true;
                 }
@@ -124,7 +122,6 @@ namespace Trust.Extensions
                 if (curDistance < followDistance)
                 {
                     //await StopMoving();
-                    Navigator.PlayerMover.MoveStop();
                     Navigator.Stop();
                     return true;
                 }
@@ -160,7 +157,6 @@ namespace Trust.Extensions
             Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
 #endif
             //await StopMoving();
-            Navigator.PlayerMover.MoveStop();
             Navigator.Stop();
             return false;
         }
@@ -178,7 +174,6 @@ namespace Trust.Extensions
             int ticks = 0;
             while (MovementManager.IsMoving && ticks < 100)
             {
-                Navigator.PlayerMover.MoveStop();
                 Navigator.Stop();
                 await Coroutine.Sleep(100);
                 ticks++;
