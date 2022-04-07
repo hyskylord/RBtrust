@@ -1,4 +1,4 @@
-﻿using Buddy.Coroutines;
+using Buddy.Coroutines;
 using ff14bot;
 using ff14bot.Behavior;
 using ff14bot.Helpers;
@@ -55,6 +55,7 @@ namespace Trust.Extensions
             if (curDistance < followDistance)
             {
                 //await StopMoving();
+                Navigator.PlayerMover.MoveStop();
                 Navigator.Stop();
                 return true;
             }
@@ -65,7 +66,10 @@ namespace Trust.Extensions
 
                 if (curDistance < followDistance)
                 {
-                   break;
+                    //await StopMoving();
+                    Navigator.PlayerMover.MoveStop();
+                    Navigator.Stop();
+                    return true;
                 }
 
                 if (Core.Me.IsDead)
@@ -95,7 +99,7 @@ namespace Trust.Extensions
                 await Coroutine.Sleep(msWait);
             }
 
-            return await StopMoving();
+            return false;
         }
 
         public static async Task<bool> Follow2(this BattleCharacter bc, Stopwatch sw, double TimeToFollow = 3000, float followDistance = 0.3f, int msWait = 0, bool useMesh = false)
@@ -113,14 +117,16 @@ namespace Trust.Extensions
                 sw.Restart();
             }
 
-            if (!Core.Me.IsDead && Core.Me.InCombat && (sw.ElapsedMilliseconds <= TimeToFollow))
+            while (!Core.Me.IsDead && Core.Me.InCombat && (sw.ElapsedMilliseconds <= TimeToFollow))
             {
-                            
+                curDistance = Core.Me.Location.Distance(bc.Location);
+
                 if (curDistance < followDistance)
                 {
-                   //await StopMoving();
-                   Navigator.Stop();
-                   return true;
+                    //await StopMoving();
+                    Navigator.PlayerMover.MoveStop();
+                    Navigator.Stop();
+                    return true;
                 }
 
                 if (Core.Me.IsCasting)
@@ -136,7 +142,7 @@ namespace Trust.Extensions
                 {
                     Navigator.PlayerMover.MoveTowards(bc.Location);
                 }
-                               
+
 
                 await Coroutine.Yield();
                 await Coroutine.Sleep(msWait);
@@ -146,18 +152,16 @@ namespace Trust.Extensions
 #else
                 Logging.Write(Colors.Aquamarine, $"Following {bc.Name} [Distance: {curDistance}]");
 #endif
-                
+
             }
-            else
-            {
 #if RB_CN
             Logging.Write(Colors.Aquamarine, $"跟随停止 队友 {bc.Name} [距离: {Core.Me.Distance(bc.Location)}]");
 #else
-                Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
+            Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
 #endif
-                //await StopMoving();
-                Navigator.Stop();
-            }
+            //await StopMoving();
+            Navigator.PlayerMover.MoveStop();
+            Navigator.Stop();
             return false;
         }
         /// <summary>
@@ -174,6 +178,7 @@ namespace Trust.Extensions
             int ticks = 0;
             while (MovementManager.IsMoving && ticks < 100)
             {
+                Navigator.PlayerMover.MoveStop();
                 Navigator.Stop();
                 await Coroutine.Sleep(100);
                 ticks++;
