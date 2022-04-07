@@ -1,4 +1,4 @@
-﻿using Clio.Utilities;
+using Clio.Utilities;
 using Buddy.Coroutines;
 using ff14bot;
 using ff14bot.AClasses;
@@ -96,7 +96,7 @@ namespace Trust.Dungeons
         // GENERIC MECHANICS
         private HashSet<uint> stack = new HashSet<uint>()
             {
-                25234, 25233, 25250, 24145
+                25234, 25233, 25250, 24145, 25253
             };
 
         // B1
@@ -116,8 +116,6 @@ namespace Trust.Dungeons
         /// <inheritdoc/>
         public override async Task<bool> RunAsync()
         {
-            await Coroutine.Yield();   
-
             if (!Core.Me.InCombat)
             { 
                 CapabilityManager.Update(TrustHandle1, CapabilityFlags.Movement, 0, "End Combat");
@@ -142,9 +140,9 @@ namespace Trust.Dungeons
                 CapabilityManager.Update(TrustHandle1, CapabilityFlags.Movement, 1000, "Follow/Stack Mechanic In Progress");
                 CapabilityManager.Update(TrustHandle2, CapabilityFlags.Facing, 1000, "Follow/Stack Mechanic In Progress");
                 await MovementHelpers.GetClosestAlly.Follow();
-                                
+                await Coroutine.Yield();
 
-               
+
             }
 
             if (STsw.ElapsedMilliseconds > 3000)
@@ -168,7 +166,7 @@ namespace Trust.Dungeons
                     sidestepPlugin.Enabled = false;
                     AvoidanceManager.RemoveAllAvoids(i=> i.CanRun);
                     await MovementHelpers.GetClosestAlly.Follow2(DAsw, 24000);
- 
+                    await Coroutine.Yield();
                 }
                            
             }
@@ -192,8 +190,8 @@ namespace Trust.Dungeons
                         sidestepPlugin.Enabled = false;
                         AvoidanceManager.RemoveAllAvoids(i=> i.CanRun);
                         await MovementHelpers.GetClosestAlly.Follow2(TMsw, 20000);
-                        
-                    }
+                        await Coroutine.Yield();
+                }
                                 
                 if (TMsw.ElapsedMilliseconds >= 20000)
                 { 
