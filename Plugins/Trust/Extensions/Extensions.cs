@@ -148,13 +148,16 @@ namespace Trust.Extensions
 #endif
                 
             }
+            else
+            {
 #if RB_CN
             Logging.Write(Colors.Aquamarine, $"跟随停止 队友 {bc.Name} [距离: {Core.Me.Distance(bc.Location)}]");
 #else
-            Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
+                Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
 #endif
-            //await StopMoving();
-            Navigator.Stop();
+                //await StopMoving();
+                Navigator.Stop();
+            }
             return false;
         }
         /// <summary>
