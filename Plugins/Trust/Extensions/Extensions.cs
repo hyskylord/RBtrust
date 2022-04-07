@@ -1,10 +1,14 @@
-﻿using Buddy.Coroutines;
+using Buddy.Coroutines;
 using ff14bot;
 using ff14bot.Behavior;
 using ff14bot.Helpers;
 using ff14bot.Managers;
 using ff14bot.Navigation;
 using ff14bot.Objects;
+using ff14bot.AClasses;
+using ff14bot.Interfaces;
+using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,27 +41,35 @@ namespace Trust.Extensions
         /// <param name="msWait">Time between movement ticks, in milliseconds.</param>
         /// <param name="useMesh">Whether to use Nav Mesh or move blindly.</param>
         /// <returns><see langword="true"/> if this behavior expected/handled execution.</returns>
-        public static async Task<bool> Follow(this BattleCharacter bc, float followDistance = 0.3f, int msWait = 100, bool useMesh = false)
+        public static async Task<bool> Follow(this BattleCharacter bc, float followDistance = 0.3f, int msWait = 0, bool useMesh = false)
         {
-            float curDistance = Core.Me.Location.Distance(bc.Location);
+            
 
             if (bc == null)
             {
                 return true;
             }
 
+            float curDistance = Core.Me.Location.Distance(bc.Location);
+
             if (curDistance < followDistance)
             {
+                //await StopMoving();
+                Navigator.PlayerMover.MoveStop();
+                Navigator.Stop();
                 return true;
             }
 
-            while (!Core.Me.IsDead)
+            while (!Core.Me.IsDead && Core.Me.InCombat)
             {
                 curDistance = Core.Me.Location.Distance(bc.Location);
 
                 if (curDistance < followDistance)
                 {
-                    break;
+                    //await StopMoving();
+                    Navigator.PlayerMover.MoveStop();
+                    Navigator.Stop();
+                    return true;
                 }
 
                 if (Core.Me.IsDead)
@@ -83,12 +95,75 @@ namespace Trust.Extensions
                     Navigator.PlayerMover.MoveTowards(bc.Location);
                 }
 
+                await Coroutine.Yield();
                 await Coroutine.Sleep(msWait);
             }
 
-            return await StopMoving();
+            return false;
         }
 
+        public static async Task<bool> Follow2(this BattleCharacter bc, Stopwatch sw, double TimeToFollow = 3000, float followDistance = 0.3f, int msWait = 0, bool useMesh = false)
+        {
+
+            float curDistance = Core.Me.Location.Distance(bc.Location);
+
+            if (bc == null)
+            {
+                return true;
+            }
+
+            if (!sw.IsRunning)
+            {
+                sw.Restart();
+            }
+
+            while (!Core.Me.IsDead && Core.Me.InCombat && (sw.ElapsedMilliseconds <= TimeToFollow))
+            {
+                curDistance = Core.Me.Location.Distance(bc.Location);
+
+                if (curDistance < followDistance)
+                {
+                    //await StopMoving();
+                    Navigator.PlayerMover.MoveStop();
+                    Navigator.Stop();
+                    return true;
+                }
+
+                if (Core.Me.IsCasting)
+                {
+                    ActionManager.StopCasting();
+                }
+
+                else if (useMesh)
+                {
+                    await CommonTasks.MoveTo(bc.Location);
+                }
+                else
+                {
+                    Navigator.PlayerMover.MoveTowards(bc.Location);
+                }
+
+
+                await Coroutine.Yield();
+                await Coroutine.Sleep(msWait);
+
+#if RB_CN
+                Logging.Write(Colors.Aquamarine, $"跟随 队友 {bc.Name} [距离: {Core.Me.Distance(bc.Location)}]");
+#else
+                Logging.Write(Colors.Aquamarine, $"Following {bc.Name} [Distance: {curDistance}]");
+#endif
+
+            }
+#if RB_CN
+            Logging.Write(Colors.Aquamarine, $"跟随停止 队友 {bc.Name} [距离: {Core.Me.Distance(bc.Location)}]");
+#else
+            Logging.Write(Colors.Aquamarine, $"Following Stopped {bc.Name} [Distance: {curDistance}]");
+#endif
+            //await StopMoving();
+            Navigator.PlayerMover.MoveStop();
+            Navigator.Stop();
+            return false;
+        }
         /// <summary>
         /// Stops the player's movement.
         /// </summary>
@@ -103,6 +178,7 @@ namespace Trust.Extensions
             int ticks = 0;
             while (MovementManager.IsMoving && ticks < 100)
             {
+                Navigator.PlayerMover.MoveStop();
                 Navigator.Stop();
                 await Coroutine.Sleep(100);
                 ticks++;
