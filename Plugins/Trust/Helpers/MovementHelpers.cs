@@ -94,7 +94,7 @@ namespace Trust.Helpers
                 foreach (BattleCharacter npc in PartyManager.AllMembers.Select(p => p.BattleCharacter).OrderByDescending(obj => Core.Player.Distance(obj)))
                 {
                     AvoidanceManager.AddAvoidObject<BattleCharacter>(
-                        () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS,
+                        () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS && DateTime.Now.TimeOfDay.TotalMilliseconds >= currentMS,
                         radius: spreadDistance,
                         npc.ObjectId);
                 }
@@ -153,7 +153,7 @@ namespace Trust.Helpers
                                 .Where(obj => PartyMembers.AllPartyMemberIds.Contains(obj.NpcId)).OrderByDescending(obj => Core.Player.Distance(obj)))
             {
                 AvoidanceManager.AddAvoidObject<BattleCharacter>(
-                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS,
+                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS && DateTime.Now.TimeOfDay.TotalMilliseconds >= currentMS,
                     radius: spreadDistance,
                     npc.ObjectId);
 
@@ -206,7 +206,7 @@ namespace Trust.Helpers
                 .OrderByDescending(r => Core.Player.Distance()))
             {
                 AvoidanceManager.AddAvoidObject<BattleCharacter>(
-                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS,
+                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS && DateTime.Now.TimeOfDay.TotalMilliseconds >= currentMS,
                     () => new Vector3(playerLoc.X - ls, playerLoc.Y, playerLoc.Z),
                     leashRadius: 40,
                     radius: spreadDistance,
@@ -252,7 +252,7 @@ namespace Trust.Helpers
                 .OrderByDescending(r => Core.Player.Distance()))
             {
                 AvoidanceManager.AddAvoidObject<BattleCharacter>(
-                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS,
+                    () => DateTime.Now.TimeOfDay.TotalMilliseconds <= endMS && DateTime.Now.TimeOfDay.TotalMilliseconds >= currentMS,
                     () => vector,
                     leashRadius: 40,
                     radius: spreadDistance,
